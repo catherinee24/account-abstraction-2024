@@ -47,6 +47,7 @@ contract MinimalAccount is IAccount, Ownable {
         i_entryPoint = IEntryPoint(entryPoint);
     }
 
+    receive() external payable {}
     /*/////////////////////////////////////////////////////////////////////////////////////////////////////////
                                          EXTERNAL AND PULIC FUNCTIONS
     /////////////////////////////////////////////////////////////////////////////////////////////////////////*/
@@ -58,7 +59,7 @@ contract MinimalAccount is IAccount, Ownable {
         external
         requireFromEntryPointOrOwner
     {
-        (bool success, bytes memory result) = destinatio.call{ value: value }(functionData);
+        (bool success, bytes memory result) = destination.call{ value: value }(functionData);
 
         if (!success) {
             revert MinimalAccount__CallFailed(result);
