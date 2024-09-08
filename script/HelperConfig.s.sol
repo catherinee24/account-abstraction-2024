@@ -47,7 +47,7 @@ contract HelperConfig is Script {
     }
 
     function getOrCreateAnvilEthConfig() public returns (NetworkConfig memory) {
-        if (localNetworkConfig.entryPoint != address(0)) {
+        if (localNetworkConfig.account != address(0)) {
             return localNetworkConfig;
         }
     }
