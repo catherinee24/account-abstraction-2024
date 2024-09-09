@@ -3,18 +3,14 @@ src = "src"
 out = "out"
 libs = ["lib"]
 solc = "0.8.24"
-
+remappings = [
+    '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
+]
 is-system = true
 via-ir = true
 fs_permissions = [
     { access = "read", path = "./broadcast" },
     { access = "read", path = "./reports" },
-]
-remappings = [
-    'murky/=lib/murky/',
-    '@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/',
-    'foundry-devops/=lib/foundry-devops',
-    'forge-std/=lib/forge-std/src/',
 ]
 
 [fmt]
