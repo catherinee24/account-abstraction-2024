@@ -50,7 +50,5 @@ contract MinimalAccountTest is Test {
         vm.prank(randomUser);
         vm.expectRevert(MinimalAccount.MinimalAccount__NotFromEntryPointOrOwner.selector);
         minimalAccount.execute(destination, value, functionData);
-
     }
-
 }
