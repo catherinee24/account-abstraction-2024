@@ -8,8 +8,12 @@ import { SendPackedUserOp, PackedUserOperation } from "../script/SendPackedUserO
 import { DeployMinimalAccount } from "../script/DeployMinimalAccount.s.sol";
 import { ERC20Mock } from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import { IEntryPoint } from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
+import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 contract MinimalAccountTest is Test {
+    using MessageHashUtils for bytes32;
+
     MinimalAccount minimalAccount;
     HelperConfig config;
     DeployMinimalAccount deployer;
@@ -56,7 +60,7 @@ contract MinimalAccountTest is Test {
         minimalAccount.execute(destination, value, functionData);
     }
 
-    function testRecoverSignedOp() public view {
+    function testRecoverSignedOp() public {
         //arrange
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
         address destination = address(usdc);
@@ -66,11 +70,16 @@ contract MinimalAccountTest is Test {
         //This line is basically saying: Heyy entryPoint contract call our contract and then our contract call usdc.mint
         bytes memory executeCalldata =
             abi.encodeWithSelector(MinimalAccount.execute.selector, destination, value, functionData);
-        PackedUserOperation memory userOp =
+        PackedUserOperation memory packedUserOp =
             sendPackedUserOp.generatedSignedUserOperation(executeCalldata, config.getConfig());
 
+        bytes32 userOpHash = IEntryPoint(config.getConfig().entryPoint).getUserOpHash(packedUserOp);
+        bytes32 digest = userOpHash.toEthSignedMessageHash();
+
         //act
+        address actualSigner = ECDSA.recover(digest, packedUserOp.signature);
 
         //assert
+        assertEq(actualSigner, minimalAccount.owner());
     }
 }
