@@ -6,7 +6,6 @@ import { PackedUserOperation } from "lib/account-abstraction/contracts/interface
 import { HelperConfig } from "./HelperConfig.s.sol";
 import { IEntryPoint } from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract SendPackedUserOp is Script {
     using MessageHashUtils for bytes32;
@@ -15,7 +14,7 @@ contract SendPackedUserOp is Script {
 
     function generatedSignedUserOperation(
         bytes memory callData,
-        HelperConfig.qNetworkConfig memory config
+        HelperConfig.NetworkConfig memory config
     )
         public
         view
@@ -23,17 +22,17 @@ contract SendPackedUserOp is Script {
     {
         //1. generate the unsigned data
         uint256 nonce = vm.getNonce(config.account);
-        PackedUserOperation memory unsignedUserOp = _generateUnsignedUserOperation(callData, config.account, nonce);
+        PackedUserOperation memory userOp = _generateUnsignedUserOperation(callData, config.account, nonce);
 
         //2 get the userOp Hash
-        bytes32 userOpHash = IEntryPoint(config.entryPoint).getUserOpHash(unsignedUserOp);
+        bytes32 userOpHash = IEntryPoint(config.entryPoint).getUserOpHash(userOp);
         bytes32 digest = userOpHash.toEthSignedMessageHash();
 
         //3. sign it and return it
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(config.account, digest);
-        unsignedUserOp.signature = abi.encodePacked(r, s, v); //Note the order of r,s,v is different from asigning
+        userOp.signature = abi.encodePacked(r, s, v); //Note the order of r,s,v is different from asigning
             // variables (uint8 v, bytes32 r, bytes32 s)
-        return unsignedUserOp;
+        return userOp;
     }
 
     /**
