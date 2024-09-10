@@ -82,4 +82,47 @@ contract MinimalAccountTest is Test {
         //assert
         assertEq(actualSigner, minimalAccount.owner());
     }
+
+    // sign userOp
+    // call validateUserOp
+    // assert the return is correct
+    function testValidationOfUserOp() executeCommands public {
+        // Arrange
+        assertEq(usdc.balanceOf(address(minimalAccount)), 0);
+        address destination = address(usdc);
+        uint256 value = 0;
+        bytes memory functionData = abi.encodeWithSelector(ERC20Mock.mint.selector, address(minimalAccount), AMOUNT);
+        bytes memory executeCalldata = abi.encodeWithSelector(MinimalAccount.execute.selector, destination, value, functionData);
+        PackedUserOperation memory packedUserOp = sendPackedUserOp.generatedSignedUserOperation(executeCalldata, config.getConfig());
+        bytes32 userOpHash = IEntryPoint(config.getConfig().entryPoint).getUserOpHash(packedUserOp);
+        uint256 missingAccountFunds = 1e18;
+
+        //Act
+        vm.prank(address(config.getConfig().entryPoint));
+        uint256 validationData = minimalAccount.validateUserOp(packedUserOp, userOpHash, missingAccountFunds);
+        assertEq(validationData, 0);
+    }
+
+    function testEntryPointCanExecuteCommands() public {
+        //arrange
+        assertEq(usdc.balanceOf(address(minimalAccount)), 0);
+        address destination = address(usdc);
+        uint256 value = 0;
+        bytes memory functionData = abi.encodeWithSelector(ERC20Mock.mint.selector, address(minimalAccount), AMOUNT);
+        bytes memory executeCalldata = abi.encodeWithSelector(MinimalAccount.execute.selector, destination, value, functionData);
+        PackedUserOperation memory packedUserOp = sendPackedUserOp.generatedSignedUserOperation(executeCalldata, config.getConfig());
+
+        PackedUserOperation[] memory ops = new PackedUserOperation[](1);
+        ops[0] = packedUserOp;
+
+        //-> tenemos que fondear minimalAccount
+        vm.deal(address(minimalAccount), 1e18);
+
+        //act > aqui vamos a probar que un usuario random "cualquier alt mempol node" puede submit al entryPoint, siempre y cuando nosotros ayamos firmado cualquiera puede enviar una tx
+        vm.prank(randomUser);
+        IEntryPoint(config.getConfig().entryPoint).handleOps(ops, payable(randomUser));
+
+        //assert
+        assertEq(usdc.balanceOf(address(minimalAccount)), AMOUNT);
+    }
 }
