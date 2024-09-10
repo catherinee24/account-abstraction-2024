@@ -9,6 +9,13 @@ import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/Mes
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { IEntryPoint } from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
 
+/**
+ * @author: CatellaTech
+ * @author: Original work by Cyfrin Updraft 
+ * @title MinimalAccount
+ * @notice This contract implements a minimalistic version of an Account Abstraction according to EIP-4337.
+ * It allows executing transactions through the `EnntryPoint` and validating user operations.
+ */
 contract MinimalAccount is IAccount, Ownable {
     /*/////////////////////////////////////////////////////////////////////////////////////////////////////////
                                                 ERRORS
@@ -47,10 +54,19 @@ contract MinimalAccount is IAccount, Ownable {
         i_entryPoint = IEntryPoint(entryPoint);
     }
 
+    /**
+     * @notice Fallback function to receive Ether.
+     */
     receive() external payable { }
     /*/////////////////////////////////////////////////////////////////////////////////////////////////////////
                                          EXTERNAL AND PULIC FUNCTIONS
     /////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+    /**
+     * @notice Executes a transaction to the specified destination.
+     * @param destination The address to send the call.
+     * @param value The amount of Ether to send.
+     * @param functionData The data to be sent in the call.
+     */
 
     function execute(
         address destination,
@@ -67,7 +83,13 @@ contract MinimalAccount is IAccount, Ownable {
         }
     }
 
-    //A signature is valid, if it is the MinimalAccount contract owner
+    /**
+     * @notice Validates a User Operation and pre-funds the transaction if necessary.
+     * @param userOp The packed user operation.
+     * @param userOpHash The hash of the user operation.
+     * @param missingAccountFunds The missing amount of funds to pre-fund the operation.
+     * @return validationData The result of the signature validation.
+     */
     function validateUserOp(
         PackedUserOperation calldata userOp,
         bytes32 userOpHash,
@@ -85,7 +107,12 @@ contract MinimalAccount is IAccount, Ownable {
     /*/////////////////////////////////////////////////////////////////////////////////////////////////////////
                                          INTERNAL AND PRIVATE FUNCTIONS
     /////////////////////////////////////////////////////////////////////////////////////////////////////////*/
-    // this userOpHash its going to be the EIP 191 version of the signed hash.
+    /**
+     * @dev Validates the signature of the User Operation.
+     * @param userOp The packed user operation.
+     * @param userOpHash The hash of the user operation.
+     * @return validationData The result of the signature validation.
+     */
     function _validateSignature(
         PackedUserOperation calldata userOp,
         bytes32 userOpHash
@@ -103,6 +130,10 @@ contract MinimalAccount is IAccount, Ownable {
         }
     }
 
+    /**
+     * @dev Prefunds the transaction with the missing account funds.
+     * @param missingAccountFunds The amount of funds required to pre-fund the operation.
+     */
     function _payPrefund(uint256 missingAccountFunds) internal {
         if (missingAccountFunds != 0) {
             (bool success,) = payable(msg.sender).call{ value: missingAccountFunds, gas: type(uint256).max }("");
@@ -113,6 +144,10 @@ contract MinimalAccount is IAccount, Ownable {
     /*/////////////////////////////////////////////////////////////////////////////////////////////////////////
                                                  GETTER FUNCTIONS
     /////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+    /**
+     * @notice Returns the address of the EntryPoint contract.
+     * @return The address of the EntryPoint contract.
+     */
     function getEntryPoint() public view returns (address) {
         return address(i_entryPoint);
     }

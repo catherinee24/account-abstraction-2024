@@ -14,31 +14,32 @@ contract SendPackedUserOp is Script {
 
     function generatedSignedUserOperation(
         bytes memory callData,
-        HelperConfig.NetworkConfig memory config
+        HelperConfig.NetworkConfig memory config,
+        address minimalAccount
     )
         public
         view
         returns (PackedUserOperation memory)
     {
         //1. generate the unsigned data
-        uint256 nonce = vm.getNonce(config.account);
-        PackedUserOperation memory userOp = _generateUnsignedUserOperation(callData, config.account, nonce);
+        uint256 nonce = vm.getNonce(minimalAccount) -1;
+        PackedUserOperation memory userOp = _generateUnsignedUserOperation(callData, minimalAccount, nonce);
 
         //2 get the userOp Hash
         bytes32 userOpHash = IEntryPoint(config.entryPoint).getUserOpHash(userOp);
         bytes32 digest = userOpHash.toEthSignedMessageHash();
 
         //3. sign it and return it
-        uint8 v; 
-        bytes32 r; 
+        uint8 v;
+        bytes32 r;
         bytes32 s;
         uint256 ANVIL_DEFAULT_KEY = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
-        if(block.chainid == 31337) {
-           (v, r, s) = vm.sign(ANVIL_DEFAULT_KEY, digest);
-        }else{
+        if (block.chainid == 31_337) {
+            (v, r, s) = vm.sign(ANVIL_DEFAULT_KEY, digest);
+        } else {
             (v, r, s) = vm.sign(config.account, digest);
         }
-        
+
         userOp.signature = abi.encodePacked(r, s, v); //Note the order of r,s,v is different from asigning
             // variables (uint8 v, bytes32 r, bytes32 s)
         return userOp;
