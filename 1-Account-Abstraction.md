@@ -1,6 +1,6 @@
-# Account Abstraction Lesson 1: Introduction
+# Account Abstraction Lesson 1: Introduction 
 
-Welcome to the course on Account Abstraction! In this lesson, you will learn what account abstraction is and why it's important in blockchain technology.
+Welcome to the course on Account Abstraction. In this lesson, you will learn what account abstraction is and why it's important in blockchain technology.
 
 ##### Account abstraction also known as (EIP 4337) is a basic idea in blockchain that helps fix some common problems faced by users and developers. In this lesson, you'll learn:
 
