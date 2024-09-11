@@ -4,7 +4,7 @@ Welcome to the third lesson of our Account Abstraction course! In this lesson, w
 
 * Creating a new Foundry project.
 * Setting up our environment to work with Ethereum.
-* Reviewing the EIP for ERC-4337.
+* Reviewing the EIP for **ERC-4337**.
 * Going over the key code needed for our contract.
 
 To start, make sure you have Foundry installed and updated. You can do this by running the following command in your terminal.
@@ -18,7 +18,7 @@ forge init
 * The first question is: what do we need to do?
 
 The first thing we need to do is look up **EIP 4337** to see how these smart contracts should look.
-> 📝 TIPS <br> To view a smart contract in an editor from Etherscan, we add deph.net to the link like this: etherscan.deph.net/address/.....
+> 📝 TIPS <br> To view a smaErt contract in an editor from Etherscan, we add deph.net to the link like this: etherscan.deph.net/address/.....
 
 In the `src` folder, create two new folders
 
