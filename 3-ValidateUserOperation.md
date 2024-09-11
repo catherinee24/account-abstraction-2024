@@ -16,6 +16,7 @@ It compares the signer’s address with the owner’s address to confirm validit
 
 The **Ownable** contract from **OpenZeppelin** is used to manage contract ownership.
 We also use **OpenZeppelin’s** **ECDSA** and **MessageHashUtils** to handle message signing and signature recovery.
+
 ```bash
 forge install openzeppelin/openzeppelin-contracts@v5.0.2 --no-commit
 > foundry.toml -> remappings = ["@openzeppelin/contracts=lib/openzeppelin-contracts/contracts"]
