@@ -10,8 +10,8 @@ import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { IEntryPoint } from "lib/account-abstraction/contracts/interfaces/IEntryPoint.sol";
 
 /**
- * @author: CatellaTech
- * @author: Original work by Cyfrin Updraft 
+ * @author CatellaTech
+ * @author Original work by Cyfrin Updraft
  * @title MinimalAccount
  * @notice This contract implements a minimalistic version of an Account Abstraction according to EIP-4337.
  * It allows executing transactions through the `EnntryPoint` and validating user operations.
@@ -136,6 +136,10 @@ contract MinimalAccount is IAccount, Ownable {
      */
     function _payPrefund(uint256 missingAccountFunds) internal {
         if (missingAccountFunds != 0) {
+            /**
+             * Envía a msg.sender la cantidad de dinero que falta (missingAccountFunds) usando todo el gas disponible
+             * para asegurarte de que la transacción se realice".
+             */
             (bool success,) = payable(msg.sender).call{ value: missingAccountFunds, gas: type(uint256).max }("");
             (success);
         }

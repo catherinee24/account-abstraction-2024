@@ -32,7 +32,10 @@ contract MinimalAccountTest is Test {
         sendPackedUserOp = new SendPackedUserOp();
     }
 
-    //function execute(address destination, uint256 value, bytes calldata functionData
+    /**
+     * @dev Tests that the owner of the `MinimalAccount` contract can execute commands.
+     * Verifies that the USDC balance of the `MinimalAccount` increases after executing the mint command.
+     */
     function testOwnerCanExecuteCommands() public {
         //arrange
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
@@ -40,6 +43,7 @@ contract MinimalAccountTest is Test {
         uint256 value = 0;
         bytes memory functionData = abi.encodeWithSelector(ERC20Mock.mint.selector, address(minimalAccount), AMOUNT);
 
+        //function execute(address destination, uint256 value, bytes calldata functionData
         //act
         vm.prank(minimalAccount.owner());
         minimalAccount.execute(destination, value, functionData);
@@ -48,6 +52,10 @@ contract MinimalAccountTest is Test {
         assertEq(usdc.balanceOf(address(minimalAccount)), AMOUNT);
     }
 
+    /**
+     * @dev Tests that a non-owner cannot execute commands on the `MinimalAccount` contract.
+     * Expects a revert if a non-owner tries to execute a command.
+     */
     function testNonOwnerCannotExecuteCommands() public {
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
         address destination = address(usdc);
@@ -60,6 +68,10 @@ contract MinimalAccountTest is Test {
         minimalAccount.execute(destination, value, functionData);
     }
 
+    /**
+     * @dev Tests the recovery of the signed operation.
+     * Verifies that the signature of a `PackedUserOperation` matches the expected owner's address.
+     */
     function testRecoverSignedOp() public {
         //arrange
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
@@ -70,6 +82,7 @@ contract MinimalAccountTest is Test {
         //This line is basically saying: Heyy entryPoint contract call our contract and then our contract call usdc.mint
         bytes memory executeCalldata =
             abi.encodeWithSelector(MinimalAccount.execute.selector, destination, value, functionData);
+
         PackedUserOperation memory packedUserOp =
             sendPackedUserOp.generatedSignedUserOperation(executeCalldata, config.getConfig(), address(minimalAccount));
 
@@ -83,10 +96,16 @@ contract MinimalAccountTest is Test {
         assertEq(actualSigner, minimalAccount.owner());
     }
 
-    // sign userOp
-    // call validateUserOp
-    // assert the return is correct
+    /**
+     * @dev Tests the validation of a `PackedUserOperation`` by the `MinimalAccount` contract.
+     * Verifies that the `validateUserOp` function returns the expected validation result.
+     * This is intended to be called by the `EntryPoint` contract.
+     */
     function testValidationOfUserOp() public {
+        // sign userOp
+        // call validateUserOp
+        // assert the return is correct
+
         // Arrange
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
         address destination = address(usdc);
@@ -102,9 +121,17 @@ contract MinimalAccountTest is Test {
         //Act
         vm.prank(address(config.getConfig().entryPoint));
         uint256 validationData = minimalAccount.validateUserOp(packedUserOp, userOpHash, missingAccountFunds);
+        /**
+         * this 0 represents the success of the validation SIG_VALIDATION_SUCCESS =  { SIG_VALIDATION_FAILED,
+         * SIG_VALIDATION_SUCCESS } from "lib/account-abstraction/contracts/core/Helpers.sol"
+         */
         assertEq(validationData, 0);
     }
 
+    /**
+     * @dev Tests that the `EntryPoint` contract can execute commands using a signed `PackedUserOperation`.
+     * Verifies that the `USDC` balance of `MinimalAccount` increases after handling the operation by `EntryPoint`.
+     */
     function testEntryPointCanExecuteCommands() public {
         //arrange
         assertEq(usdc.balanceOf(address(minimalAccount)), 0);
@@ -119,11 +146,11 @@ contract MinimalAccountTest is Test {
         PackedUserOperation[] memory ops = new PackedUserOperation[](1);
         ops[0] = packedUserOp;
 
-        //-> tenemos que fondear minimalAccount
+        //-> tenemos que fondear minimalAccount para asegurarnos de prefondear la tx. _payPrefund()
         vm.deal(address(minimalAccount), 1e18);
 
         //act > aqui vamos a probar que un usuario random "cualquier alt mempol node" puede submit al entryPoint,
-        // siempre y cuando nosotros ayamos firmado cualquiera puede enviar una tx
+        // siempre y cuando nosotros hayamos firmado, cualquiera puede enviar una tx.
         vm.prank(randomUser);
         IEntryPoint(config.getConfig().entryPoint).handleOps(ops, payable(randomUser));
 
