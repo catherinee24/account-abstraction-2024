@@ -137,7 +137,8 @@ contract MinimalAccount is IAccount, Ownable {
     function _payPrefund(uint256 missingAccountFunds) internal {
         if (missingAccountFunds != 0) {
             /**
-             * Envía a msg.sender la cantidad de dinero que falta (missingAccountFunds) usando todo el gas disponible
+             * Envía a msg.sender que es el `entryPoint` la cantidad de dinero que falta (missingAccountFunds) usando
+             * todo el gas disponible
              * para asegurarte de que la transacción se realice".
              */
             (bool success,) = payable(msg.sender).call{ value: missingAccountFunds, gas: type(uint256).max }("");

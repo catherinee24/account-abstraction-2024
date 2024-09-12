@@ -152,7 +152,7 @@ contract MinimalAccountTest is Test {
         //act > aqui vamos a probar que un usuario random "cualquier alt mempol node" puede submit al entryPoint,
         // siempre y cuando nosotros hayamos firmado, cualquiera puede enviar una tx.
         vm.prank(randomUser);
-        IEntryPoint(config.getConfig().entryPoint).handleOps(ops, payable(randomUser));
+        IEntryPoint(config.getConfig().entryPoint).handleOps(ops, payable(address(minimalAccount)));
 
         //assert
         assertEq(usdc.balanceOf(address(minimalAccount)), AMOUNT);
