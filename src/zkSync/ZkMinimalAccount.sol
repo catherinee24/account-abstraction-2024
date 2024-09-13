@@ -2,40 +2,41 @@
 pragma solidity ^0.8.20;
 
 import { IAccount } from "lib/foundry-era-contracts/src/system-contracts/contracts/interfaces/IAccount.sol";
+import { Transaction } from "lib/foundry-era-contracts/src/system-contracts/contracts/libraries/MemoryTransactionHelper.sol";
 
 contract ZkMinimalAccount is IAccount {
     function validateTransaction(
         bytes32 _txHash,
         bytes32 _suggestedSignedHash,
-        Transaction calldata _transaction
+        Transaction memory _transaction
     )
         external
         payable
-        returns (bytes4 magic);
+        returns (bytes4 magic){}
 
     function executeTransaction(
         bytes32 _txHash,
         bytes32 _suggestedSignedHash,
-        Transaction calldata _transaction
+        Transaction memory _transaction
     )
         external
-        payable;
+        payable {}
 
-    function executeTransactionFromOutside(Transaction calldata _transaction) external payable;
+    function executeTransactionFromOutside(Transaction memory _transaction) external payable {}
 
     function payForTransaction(
         bytes32 _txHash,
         bytes32 _suggestedSignedHash,
-        Transaction calldata _transaction
+        Transaction memory _transaction
     )
         external
-        payable;
+        payable {}
 
     function prepareForPaymaster(
         bytes32 _txHash,
         bytes32 _possibleSignedHash,
-        Transaction calldata _transaction
+        Transaction memory _transaction
     )
         external
-        payable;
+        payable {}
 }
